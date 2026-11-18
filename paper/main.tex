@@ -1,0 +1,313 @@
+\documentclass[11pt]{amsart}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype,amsmath,amssymb,amsthm,mathtools,enumitem}
+\usepackage[margin=1.1in]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\usepackage{booktabs}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\numberwithin{equation}{section}
+
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\op}{\mathrm{op}}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\vect}{vec}
+
+\hypersetup{pdftitle={Token uniformity in residual self-attention at random initialization comes from the mean token},pdfauthor={Yitzchak Shmalo}}
+
+\title[Token uniformity in residual self-attention]{Token uniformity in residual self-attention at random initialization comes from the mean token}
+\author{Yitzchak Shmalo}
+\address{Einstein Institute of Mathematics, The Hebrew University of Jerusalem, Jerusalem, Israel}
+\email{yitzchak.shmalo@gmail.com}
+\date{November 2026}
+
+\begin{document}
+
+\begin{abstract}
+We study residual self-attention networks $X_{l+1}=X_l+\alpha_lA_lX_lW_l$ at initialization, with residual scales $\alpha_l\ge0$. The value matrices $W_l$ are Gaussian. The attention matrices $A_l$ are row-stochastic and may depend on the tokens and on any randomness independent of the value matrices, which covers softmax attention with query and key matrices independent of the value matrices. Let $S_l$ be the squared Frobenius norm of $X_l$ after the mean token is subtracted from every token. If the tokens have dimension $d\ge2$ and the input $X_0$ is deterministic with $S_0>0$, then $\log S_l$ is a submartingale for every choice of attention and of residual scales; this can fail for $d=1$. Consequently, for a network of depth $L$ with $\alpha_l=c/\sqrt L$, the ratio $S_L/\|X_L\|_F^2$ stays bounded below in probability, uniformly in $L$ and in the attention. At a fixed scale $\alpha$ it decays at most at the exponential rate $\log(1+\alpha^2n)$, where $n$ is the number of tokens.
+\end{abstract}
+
+\subjclass[2020]{60G42; 60B20; 68T07}
+\keywords{self-attention, token uniformity, rank collapse, residual networks, random initialization, submartingale}
+
+\maketitle
+
+\section{Introduction}\label{sec:intro}
+
+A self-attention layer replaces each token by a convex combination of the tokens, so repeated attention averages the tokens together. Dong, Cordonnier and Loukas~\cite{DCL} made this precise: without skip connections or feed-forward layers, the output of a self-attention network converges doubly exponentially in depth to a matrix of rank one, all of whose rows are equal. They called this rank collapse and measured it by the distance of the token matrix $X\in\RR^{n\times d}$, whose $n$ rows are the tokens, from the nearest matrix $\mathbf 1x^{T}$ with equal rows, where $\mathbf 1$ is the vector of ones, and showed that skip connections stop it. We show that at initialization with Gaussian value matrices, in a network with skip connections and token dimension at least two, the logarithm of the squared Frobenius distance from the matrices with equal rows is a submartingale for every attention, provided the tokens of the input are not all equal (Theorem~\ref{thm:intro}). At a fixed residual scale the fraction of the energy in the centred part can still decay exponentially, as it does under uniform attention, but the centred energy itself does not decay at any exponential rate (Corollary~\ref{cor:fixed}), so that decay comes from growth of the mean token. Noci, Anagnostidis, Biggio, Orvieto, Singh and Lucchi~\cite{NABOSL} showed that a high alignment of the tokens at initialization makes the gradients of the queries and keys vanish, and studied the residual network $X_{l+1}=X_l+\alpha A_lX_lW_l$, with attention matrix $A_l$ and value matrix $W_l$ in layer $l$. Under the assumption that the attention matrix is uniform at initialization, which holds in the limit of large key dimension, they computed the expected inner products of the tokens and found that the correlation between tokens tends to one with depth unless the residual branches of a network of depth $L$ are scaled by $1/\sqrt L$. Noci, Li, Li, He, Hofmann, Maddison and Roy~\cite{shaped} obtained a stochastic differential equation for the token covariance in the joint limit of depth and width, for softmax attention centred at the identity with a width-dependent inverse temperature. Cirrincione~\cite{Cir} showed that residual connections prevent rank collapse for all inputs outside a set of measure zero.
+
+We study the residual network $X_{l+1}=X_l+\alpha_lA_lX_lW_l$ at initialization, with residual scales $\alpha_l\ge0$. The value matrices $W_l$ have independent $N(0,1/d)$ entries and are independent of each other and of $(X_0,R)$, where $R$ is any further randomness the attention uses. The attention matrix $A_l$ may be any row-stochastic matrix determined by $X_0$, $W_0,\dots,W_{l-1}$ and $R$, for instance a softmax of logits built from the tokens and from query and key matrices independent of the value matrices, with any inverse temperature and any mask. Uniform attention is the case $A_l=\frac1n\mathbf 1\mathbf 1^{T}$. Let $\bar x_l=\frac1nX_l^{T}\mathbf 1$ be the mean token and $P=I-\frac1n\mathbf 1\mathbf 1^{T}$. Then $PX$, the centred part of $X$, is $X$ with the mean token subtracted from every token. With $\|\cdot\|_F$ the Frobenius norm and $|\cdot|$ the Euclidean norm, let
+\[
+S_l=\|PX_l\|_F^2,\qquad T_l=\|X_l\|_F^2,\qquad r_l=S_l/T_l\in[0,1].
+\]
+We call $S_l$ the centred energy and $T_l$ the total energy, so that $T_l-S_l=n|\bar x_l|^2$. The ratio $r_l$ is the fraction of the total energy carried by the centred part, and $r_l=0$ exactly when all tokens are equal. The Frobenius distance of $X_l$ from the matrices $\mathbf 1x^{T}$ with equal rows is $\sqrt{S_l}$. We call the convergence $r_l\to0$ token uniformity. It is not the convergence of that distance to zero: under uniform attention with $\alpha_l=\alpha>0$, $d\ge3$, $S_0>0$ and a nonzero initial mean token, $S_l$ stays constant while $r_l\to0$ almost surely (Section~\ref{sec:uniform}).
+
+The skip-connection result of Dong, Cordonnier and Loukas~\cite{DCL} exhibits weights for which a residual attention network keeps the rank of its tokens, and that of Cirrincione~\cite{Cir} holds for a given network and all inputs outside a set of measure zero; neither concerns random weights. The equation of~\cite{shaped} describes a limit in which depth and width grow together. Noci et al.~\cite{NABOSL} treat uniform attention. If $W_l$ is independent of $(X_l,A_l)$, then
+\[
+\EE[X_{l+1}X_{l+1}^{T}\mid X_l,A_l]=X_lX_l^{T}+\alpha_l^2A_lX_lX_l^{T}A_l^{T},
+\]
+which for uniform attention is linear in $X_lX_l^{T}$. The expected Gram matrices then obey a closed linear recursion. For a softmax $A_l$ built from $X_l$ the right side is a nonlinear function of $X_l$ and the recursion does not close. Moreover $r_l$ is a ratio of two squared norms, and bounds on $\EE S_l$ and $\EE T_l$ give no bound on $r_l$ in probability. We work instead with the centred part $Y_l=PX_l$. Since $PA_l=PA_lP$ for every row-stochastic $A_l$, as in~\cite{DCL}, $Y_{l+1}=Y_l+\alpha_lPA_lY_lW_l$ (Lemma~\ref{lem:reduce}). Given the first $l$ layers, the increment is a centred Gaussian matrix with covariance $I_d\otimes C_l$, whatever the attention; this is the Kronecker product of the identity of $\RR^d$ with the $n\times n$ matrix $C_l=\frac{\alpha_l^2}{d}PA_lY_lY_l^{T}A_l^{T}P$. A covariance of this form has trace at least twice its largest eigenvalue once $d\ge2$, and for a centred Gaussian vector $G$ whose covariance $\Sigma$ satisfies $\Tr\Sigma\ge2\lambda_{\max}(\Sigma)$ and every $\mu\ne0$,
+\[
+\EE\log|\mu+G|^2\ge\log|\mu|^2
+\]
+(Lemma~\ref{lem:heat}, which follows from the heat equation for the Gaussian semigroup); for $\Sigma=\sigma^2I_k$ this is the subharmonicity of $\log|x|$ in dimension at least two. Hence the logarithm $\log S_l$ of the centred energy is a submartingale for every choice of attention allowed by Assumption~\ref{ass:main}. With a bound on the second moments of its increments (Proposition~\ref{prop:second}) this gives, for every $t>0$,
+\[
+\PP\bigl(\log S_L\le\log S_0-t\bigr)\le\frac{V_L}{t^2},\qquad V_L=\sum_{l<L}\Bigl((C_*+8)\frac{\alpha_l^2n}{d}+6\alpha_l^4n^2\Bigr),
+\]
+where $C_*=\sup_{s>0}s^{-2}\EE\log^2(1+s\xi)^2\approx9.39$, with $\xi\sim N(0,1)$, is the absolute constant of~\eqref{eq:C2} (Theorem~\ref{thm:tail}). Since $T_L-S_L=n|\bar x_L|^2$, off this event $n|\bar x_L|^2\ge S_0e^{-t}(1/r_L-1)$, so a small ratio forces a large mean token. Together with an elementary bound on the total energy (Proposition~\ref{prop:energy}) this gives the following bounds, at fixed $n$, $d$ and depth and explicit in $n$, $d$, $L$ and, when $\alpha_l=c/\sqrt L$, in $c$.
+
+\begin{theorem}\label{thm:intro}
+Assume $d\ge2$ and Assumption~\ref{ass:main} below, which makes $A_l$ measurable with respect to the $\sigma$-field $\cG_l$ of the first $l$ layers and $W_l$ independent of $\cG_l$. For (b) and (c) assume also that $X_0$ is deterministic and $S_0>0$.
+\begin{enumerate}[label=(\alph*)]
+\item For every $l$, on $\{S_l>0\}$, $\EE[\log S_{l+1}\mid\cG_l]\ge\log S_l$, whatever the attention matrices and the residual scales (Theorem~\ref{thm:sub}).
+\item If $\alpha_l=c/\sqrt L$ for $l<L$, then for all $t,\theta>0$,
+\[
+\PP\bigl(r_L\ge r_0e^{-t}/\theta\bigr)\ge1-\frac{V_L}{t^2}-\frac{e^{c^2n}}{\theta},
+\]
+with $V_L$ the quantity of Theorem~\ref{thm:tail}, which for $\alpha_l=c/\sqrt L$ equals $(C_*+8)c^2n/d+6c^4n^2/L$ (Corollary~\ref{cor:scaling}).
+\item If $\alpha_l=\alpha$ for all $l$, then almost surely $\liminf_{L\to\infty}\frac1L\log r_L\ge-\log(1+\alpha^2n)$ (Corollary~\ref{cor:fixed}).
+\end{enumerate}
+\end{theorem}
+
+Part (a) can fail for $d=1$ (Proposition~\ref{prop:d1}). Consider uniform attention, $A_l=\frac1n\mathbf 1\mathbf 1^{T}$, with $\alpha_l=\alpha>0$, $d\ge3$, $S_0>0$ and a nonzero initial mean token. Then the centred part does not move and the squared norm of the mean token is a product of independent factors. Hence $\frac1L\log r_L\to-\EE\log|e_1+\alpha g/\sqrt d|^2=-\alpha^2(1-2/d)+O(\alpha^4)$ almost surely (Section~\ref{sec:uniform}), where $e_1$ is the first standard basis vector of $\RR^d$ and $g\sim N(0,I_d)$. At $\alpha=c/\sqrt L$ the logarithm of the growth of the mean token has a nondegenerate Gaussian limit. This recovers, for uniform attention, the role of the scale $1/\sqrt L$ found in~\cite{NABOSL}, and shows that the order $\alpha^2$ of the rate in (c) is attained. Since $n|\bar x_L|^2=S_L(1/r_L-1)$ and $\liminf_L\frac1L\log S_L\ge0$ almost surely (Corollary~\ref{cor:fixed}), an exponential rate of decay of $r_L$ forces $|\bar x_L|^2$ to grow at least at that rate, and (c) bounds the rate.
+
+Furstenberg and Kesten~\cite{FK} proved that the top Lyapunov exponent of a product of random matrices exists, and Cohen and Newman~\cite{CN} computed the exponents of products of Gaussian matrices; there the expectation of $\log|Wx|^2$ is computed exactly, because for a matrix $W$ with independent centred Gaussian entries of equal variance the law of $|Wx|/|x|$ does not depend on $x$. Hanin and Nica~\cite{HN} show that the logarithm of the norm of a product of many large random matrices applied to a fixed vector is asymptotically Gaussian, and apply this to fully connected ReLU networks; Li, Nica and Roy~\cite{LNR} find log-Gaussian behaviour at initialization for ReLU residual networks in the limit of infinite depth and width. Here the covariance $I_d\otimes C_l$ of the increment of the centred part depends on the attention and on the tokens, and Lemma~\ref{lem:heat} replaces the exact computation by an inequality that holds for every such covariance once $d\ge2$.
+
+Remark~\ref{rem:limits} states which results survive layer normalization and feed-forward layers: the proof of Theorem~\ref{thm:sub} applies to the pre-norm arrangement but not to the post-norm one, and Proposition~\ref{prop:second} does not extend to the pre-norm arrangement. The ratio $r_l$ vanishes when the tokens are equal, not when they are parallel: tokens that become parallel with different norms keep $r_l$ away from zero (Remark~\ref{rem:limits}).
+
+Wu, Ajorlou, Wang, Jegelka and Jadbabaie~\cite{WAWJJ} showed that pure masked attention still collapses exponentially and that layer normalization admits equilibria of any rank. Nait Saada, Naderi and Tanner~\cite{NNT} identified a collapse in width, caused by a spectral gap of the attention matrix as the context grows. Cowsik, Nebabu, Qi and Ganguli~\cite{CNQG} derived update equations for the token geometry of a random transformer with feed-forward layers. Giorlandino and Goldt~\cite{GG} gave an asymptotically exact theory of signal propagation with layer normalization, skip connections and feed-forward layers through a correspondence with the random energy model. Alman and Song~\cite{AS} showed that with small weights a network with skip connections can still be approximated by a single layer.
+
+Section~\ref{sec:setting} reduces the network to the equation $Y_{l+1}=Y_l+\alpha_lPA_lY_lW_l$ for the centred part. Section~\ref{sec:sub} proves Lemma~\ref{lem:heat} and the submartingale property, and Section~\ref{sec:bounds} turns it into the bounds (b) and (c) with the second moment estimate and the bound on the total energy. Section~\ref{sec:uniform} computes the rate for uniform attention, Section~\ref{sec:numerics} reports simulations, and Section~\ref{sec:remarks} treats several heads, output projections and layer normalization. The notation is collected in Appendix~\ref{app:notation}.
+
+\section{Setting}\label{sec:setting}
+
+Tokens are the rows of $X_l\in\RR^{n\times d}$. For a matrix $B$, $\|B\|_F$ is the Frobenius norm and $\|B\|_\op$ the operator norm; $|\cdot|$ is the Euclidean norm of a vector.
+
+\begin{assumption}\label{ass:main}
+On a probability space there are $\sigma$-fields $\cG_0\subseteq\cG_1\subseteq\cdots$, matrices $X_0\in\RR^{n\times d}$, $A_l\in\RR^{n\times n}$, $W_l\in\RR^{d\times d}$ and numbers $\alpha_l\ge0$ such that, for every $l\ge0$,
+\begin{enumerate}[label=(\roman*)]
+\item $X_l$ and $A_l$ are $\cG_l$-measurable, and $A_l$ has nonnegative entries and rows summing to one;
+\item $W_l$ is independent of $\cG_l$ and has independent $N(0,1/d)$ entries, and $W_l$ is $\cG_{l+1}$-measurable;
+\item $X_{l+1}=X_l+\alpha_lA_lX_lW_l$.
+\end{enumerate}
+\end{assumption}
+
+For softmax attention, $A_l$ is the row-wise softmax of $\beta X_lQ_lK_l^{T}X_l^{T}+B_l$, where $\beta>0$, $B_l$ is a mask with entries in $[-\infty,0]$ and at least one zero in every row, and $Q_l,K_l$ are the query and key matrices. The $W_m$ are independent of each other and of $(X_0,(Q_m,K_m,B_m)_{m\ge0})$, and one takes $\cG_l$ generated by $X_0$, $(Q_m,K_m,B_m)_{m\le l}$ and $(W_m)_{m<l}$. The variance $1/d$ is a normalization: a variance $\tau^2/d$ replaces $\alpha_l$ by $\tau\alpha_l$.
+
+Write $Y_l=PX_l$, $M_l=PA_l$ and $\gamma_l$ for the largest column sum of $A_l$, so that $1\le\gamma_l\le n$.
+
+\begin{lemma}\label{lem:reduce}
+Under Assumption~\ref{ass:main}, $Y_{l+1}=Y_l+\alpha_lM_lY_lW_l$, and $\|M_l\|_\op^2\le\|A_l\|_\op^2\le\gamma_l\le n$.
+\end{lemma}
+
+\begin{proof}
+Since $A_l\mathbf 1=\mathbf 1$ and $P\mathbf 1=0$, $PA_l(I-P)=\frac1nPA_l\mathbf 1\mathbf 1^{T}=0$, so $PA_lX_l=PA_lPX_l=M_lY_l$; apply $P$ to Assumption~\ref{ass:main}(iii). For the norm, $\|M_l\|_\op\le\|P\|_\op\|A_l\|_\op=\|A_l\|_\op$ and $\|A_l\|_\op^2\le\|A_l\|_{1\to1}\|A_l\|_{\infty\to\infty}=\gamma_l\cdot1$, where $\|A\|_{1\to1}$ and $\|A\|_{\infty\to\infty}$ are the largest absolute column sum and the largest absolute row sum of $A$.
+\end{proof}
+
+\section{The submartingale property}\label{sec:sub}
+
+\begin{lemma}\label{lem:heat}
+Let $G$ be a centred Gaussian vector in $\RR^k$ with covariance $\Sigma$ such that $\Tr\Sigma\ge2\lambda_{\max}(\Sigma)$, and let $\mu\in\RR^k\setminus\{0\}$. Then $\EE\log|\mu+G|^2$ is finite and at least $\log|\mu|^2$.
+\end{lemma}
+
+\begin{proof}
+For $\varepsilon>0$ let $f_\varepsilon(x)=\log(|x|^2+\varepsilon)$. Then $\nabla^2f_\varepsilon(x)=2(|x|^2+\varepsilon)^{-1}I-4(|x|^2+\varepsilon)^{-2}xx^{T}$, so
+\[
+\Tr\bigl(\Sigma\nabla^2f_\varepsilon(x)\bigr)=\frac{2\Tr\Sigma}{|x|^2+\varepsilon}-\frac{4x^{T}\Sigma x}{(|x|^2+\varepsilon)^2}\ge\frac{2\Tr\Sigma-4\lambda_{\max}(\Sigma)}{|x|^2+\varepsilon}\ge0.
+\]
+The function $\psi(\omega)=\EE f_\varepsilon(\mu+\sqrt\omega\,G)$ satisfies $\psi'(\omega)=\frac12\EE\Tr(\Sigma\nabla^2f_\varepsilon(\mu+\sqrt\omega\,G))$ for $\omega>0$, by the heat equation for the Gaussian semigroup, since $f_\varepsilon$ is smooth with bounded second derivatives; and $\psi$ is continuous at $0$. Hence $\EE f_\varepsilon(\mu+G)=\psi(1)\ge\psi(0)=f_\varepsilon(\mu)\ge\log|\mu|^2$. As $\varepsilon\downarrow0$, $f_\varepsilon(\mu+G)$ decreases to $\log|\mu+G|^2$ and $\EE f_1(\mu+G)<\infty$, so by monotone convergence $\EE\log|\mu+G|^2=\lim_{\varepsilon\downarrow0}\EE f_\varepsilon(\mu+G)\ge\log|\mu|^2$, and the limit is finite.
+\end{proof}
+
+\begin{theorem}\label{thm:sub}
+Assume Assumption~\ref{ass:main} and $d\ge2$. For every $l$, on the event $\{S_l>0\}$,
+\[
+\EE[\log S_{l+1}\mid\cG_l]\ge\log S_l,
+\]
+and $S_{l+1}=0$ on $\{S_l=0\}$. If $S_0>0$ almost surely and $\EE|\log S_0|<\infty$ (for instance, $X_0$ deterministic with $S_0>0$), then $S_l>0$ for all $l$ almost surely and $(\log S_l)_{l\ge0}$ is a $(\cG_l)$-submartingale.
+\end{theorem}
+
+\begin{proof}
+Condition on $\cG_l$, so that $Y=Y_l$, $M=M_l$ and $\alpha=\alpha_l$ are fixed and $W=W_l$ has independent $N(0,1/d)$ entries. By Lemma~\ref{lem:reduce}, $Y_{l+1}=Y+\alpha MYW$, and $Y_{l+1}=0$ if $Y=0$. The $j$-th column of $MYW$ is $MYw_j$, where $w_1,\dots,w_d$ are the columns of $W$, independent with law $N(0,I_d/d)$. So $G=\vect(\alpha MYW)$ is a centred Gaussian vector in $\RR^{nd}$ with covariance $\Sigma=I_d\otimes C$, $C=\frac{\alpha^2}dMYY^{T}M^{T}$. Then $\Tr\Sigma=d\Tr C\ge d\lambda_{\max}(C)=d\lambda_{\max}(\Sigma)\ge2\lambda_{\max}(\Sigma)$, and Lemma~\ref{lem:heat} with $\mu=\vect Y$ gives $\EE[\log S_{l+1}\mid\cG_l]\ge\log S_l$ when $Y\ne0$, and the left side is finite. In particular $\log S_{l+1}>-\infty$, that is $S_{l+1}>0$, almost surely on $\{S_l>0\}$. If $S_0>0$, induction gives $S_l>0$ for all $l$, and $\log S_l=\log S_0+\sum_{m<l}\log(S_{m+1}/S_m)$ is integrable because each increment has a second moment bounded by a constant (Proposition~\ref{prop:second} below).
+\end{proof}
+
+The condition $d\ge2$ cannot be removed.
+
+\begin{proposition}\label{prop:d1}
+Let $d=1$, $n\ge2$, $A_l=I$ and $0<\alpha_l=\alpha\le1/4$. Then $\EE[\log S_{l+1}\mid\cG_l]<\log S_l$ whenever $S_l>0$.
+\end{proposition}
+
+\begin{proof}
+Here $M_l=P$ and $W_l=w$ is a single $N(0,1)$ variable, so $Y_{l+1}=(1+\alpha w)Y_l$ and $\EE[\log S_{l+1}\mid\cG_l]-\log S_l=h(\alpha)$ with $h(s)=\EE\log(1+s\xi)^2=\EE\log|1-s^2\xi^2|$, $\xi\sim N(0,1)$, the second form by symmetry of $\xi$. On $\{|\xi|\le1/(2s)\}$, $\log(1-s^2\xi^2)\le-s^2\xi^2$; elsewhere $\log|1-s^2\xi^2|\le\log(1+s^2\xi^2)\le s^2\xi^2$. With $\kappa(u)=\EE[\xi^2;|\xi|>u]=2(u\varphi(u)+1-\Phi(u))$, where $\varphi$ and $\Phi$ are the standard normal density and distribution function, this gives $h(s)\le-s^2(1-2\kappa(1/(2s)))$. For $s\le1/4$, $\kappa(1/(2s))\le\kappa(2)<0.27$, so $h(s)<-0.46s^2<0$.
+\end{proof}
+
+\section{Fluctuations and the total energy}\label{sec:bounds}
+
+With $\xi\sim N(0,1)$ as in Section~\ref{sec:intro}, the constant $C_*$ defined in the introduction is
+\begin{equation}
+C_*=\sup_{s>0}s^{-2}\,\EE\bigl[\log^2(1+s\xi)^2\bigr].\label{eq:C2}
+\end{equation}
+The constant is finite: near $s=0$ the expectation is $4s^2+O(s^4)$, and as $s\to\infty$ it grows like $(2\log s)^2$. Numerical quadrature gives $C_*\approx9.39$, attained near $s=0.51$.
+
+\begin{proposition}\label{prop:second}
+Under Assumption~\ref{ass:main}, on $\{S_l>0\}$, with $\Delta_l=\log(S_{l+1}/S_l)$,
+\[
+\EE[\Delta_l^2\mid\cG_l]\le(C_*+8)\frac{\alpha_l^2\|M_l\|_\op^2}d+6\alpha_l^4\|M_l\|_\op^4\le(C_*+8)\frac{\alpha_l^2n}d+6\alpha_l^4n^2.
+\]
+\end{proposition}
+
+\begin{proof}
+Condition on $\cG_l$ and drop the index $l$. Expanding, $S_{l+1}/S=1+2\eta+q$ with $\eta=\alpha\langle Y,MYW\rangle/\|Y\|_F^2$ and $q=\alpha^2\|MYW\|_F^2/\|Y\|_F^2\ge0$. Projecting $Y_{l+1}$ on the unit vector $Y/\|Y\|_F$ gives $S_{l+1}\ge S(1+\eta)^2$.
+
+Write $\langle Y,MYW\rangle=\sum_{j,k}F_{jk}W_{jk}$ with $F=(MY)^{T}Y\in\RR^{d\times d}$. So $\eta$ is centred Gaussian with variance $\sigma_\eta^2=\alpha^2\|F\|_F^2/(d\|Y\|_F^4)$, and $\|F\|_F\le\|M\|_\op\|Y\|_F\|Y\|_\op\le\|M\|_\op\|Y\|_F^2$ gives $\sigma_\eta^2\le\alpha^2\|M\|_\op^2/d$. The negative part satisfies $\Delta_-\le(\log(1+\eta)^2)_-$, so $\EE\Delta_-^2\le\EE\log^2(1+\eta)^2\le C_*\sigma_\eta^2$. The positive part satisfies $\Delta_+\le(S_{l+1}/S-1)_+\le|2\eta+q|$, so $\EE\Delta_+^2\le8\sigma_\eta^2+2\EE q^2$. Finally $q=z^{T}\Gamma z$ for a standard Gaussian vector $z\in\RR^{d^2}$ and a positive semidefinite $\Gamma$ with $\Tr\Gamma=\EE q=\alpha^2\|MY\|_F^2/\|Y\|_F^2\le\alpha^2\|M\|_\op^2$, and $\EE(z^{T}\Gamma z)^2=(\Tr\Gamma)^2+2\Tr\Gamma^2\le3(\Tr\Gamma)^2$. Add the two parts and use Lemma~\ref{lem:reduce}.
+\end{proof}
+
+\begin{theorem}\label{thm:tail}
+Assume Assumption~\ref{ass:main}, $d\ge2$ and $S_0>0$ almost surely. For every $L\ge1$ and $t>0$,
+\[
+\PP\bigl(\log S_L\le\log S_0-t\bigr)\le\frac{V_L}{t^2},\qquad V_L=\sum_{l<L}\Bigl((C_*+8)\frac{\alpha_l^2n}d+6\alpha_l^4n^2\Bigr).
+\]
+\end{theorem}
+
+\begin{proof}
+Let $D_l=\EE[\Delta_l\mid\cG_l]$, which is nonnegative by Theorem~\ref{thm:sub}, and $N_L=\sum_{l<L}(\Delta_l-D_l)$. Then $(N_L)$ is a martingale with $\EE N_L^2=\sum_{l<L}\EE(\Delta_l-D_l)^2\le\sum_{l<L}\EE\Delta_l^2\le V_L$ by Proposition~\ref{prop:second}. Since $\log S_L-\log S_0=\sum_{l<L}D_l+N_L\ge N_L$, Chebyshev's inequality gives the claim.
+\end{proof}
+
+\begin{proposition}\label{prop:energy}
+Under Assumption~\ref{ass:main}, $\EE[T_{l+1}\mid\cG_l]=T_l+\alpha_l^2\|A_lX_l\|_F^2\le(1+\alpha_l^2\gamma_l)T_l\le(1+\alpha_l^2n)T_l$.
+\end{proposition}
+
+\begin{proof}
+Given $\cG_l$, the cross term $2\alpha_l\langle X_l,A_lX_lW_l\rangle$ has mean zero, and $\EE\|A_lX_lW_l\|_F^2=\|A_lX_l\|_F^2$ because $\EE W_lW_l^{T}=I_d$. Writing $x_j$ for the rows of $X_l$ and $a_{ij}$ for the entries of $A_l$, convexity of $|\cdot|^2$ gives $\|A_lX_l\|_F^2=\sum_i|\sum_ja_{ij}x_j|^2\le\sum_i\sum_ja_{ij}|x_j|^2\le\gamma_lT_l$.
+\end{proof}
+
+\begin{corollary}\label{cor:scaling}
+Assume Assumption~\ref{ass:main}, $d\ge2$, $S_0>0$, $X_0$ deterministic and $\alpha_l=c/\sqrt L$ for $l<L$. For all $t,\theta>0$,
+\[
+\PP\bigl(r_L\ge r_0e^{-t}/\theta\bigr)\ge1-\frac{(C_*+8)c^2n/d+6c^4n^2/L}{t^2}-\frac{e^{c^2n}}\theta.
+\]
+\end{corollary}
+
+\begin{proof}
+By Proposition~\ref{prop:energy}, $\EE T_L\le(1+c^2n/L)^LT_0\le e^{c^2n}T_0$, so $\PP(T_L>\theta T_0)\le e^{c^2n}/\theta$ by Markov's inequality. Theorem~\ref{thm:tail} gives $\PP(S_L<S_0e^{-t})\le V_L/t^2$, with $V_L$ the bound defined in that theorem. On the complement of both events, $r_L=S_L/T_L\ge S_0e^{-t}/(\theta T_0)=r_0e^{-t}/\theta$.
+\end{proof}
+
+On the event $\{S_L\ge S_0e^{-t}\}$ alone, the identity $n|\bar x_L|^2=T_L-S_L=S_L(1-r_L)/r_L$ gives $n|\bar x_L|^2\ge S_0e^{-t}(1-r_L)/r_L$. So $r_L$ can be small only if the mean token is large compared with the centred energy of the input.
+
+The bound is uniform in $L$ and in the attention matrices. As $d\to\infty$ with $n$ and $c$ fixed, $V_L\to6c^4n^2/L$; hence for every $t>0$, $\PP(S_L<S_0e^{-t})\to0$ as $d$ and $L$ tend to infinity.
+
+\begin{corollary}\label{cor:fixed}
+Assume Assumption~\ref{ass:main}, $d\ge2$, $S_0>0$, $X_0$ deterministic and $\alpha_l=\alpha>0$ for all $l$. Then almost surely
+\[
+\liminf_{L\to\infty}\frac1L\log S_L\ge0,\qquad\limsup_{L\to\infty}\frac1L\log T_L\le\log(1+\alpha^2n),
+\]
+and hence $\liminf_{L\to\infty}\frac1L\log r_L\ge-\log(1+\alpha^2n)$.
+\end{corollary}
+
+\begin{proof}
+With $D_l$ and $N_L$ as in the proof of Theorem~\ref{thm:tail}, the martingale differences have second moments bounded by $(C_*+8)\alpha^2n/d+6\alpha^4n^2$, so the martingale $\sum_{l<L}(\Delta_l-D_l)/(l+1)$ is bounded in $L^2$ and converges almost surely, and $N_L/L\to0$ almost surely by Kronecker's lemma. Since $D_l\ge0$, $\liminf\frac1L\log S_L\ge0$. For $\varepsilon>0$, Proposition~\ref{prop:energy} and Markov's inequality give $\PP(T_L>T_0(1+\alpha^2n)^Le^{\varepsilon L})\le e^{-\varepsilon L}$, and the Borel--Cantelli lemma gives the second statement.
+\end{proof}
+
+\section{Uniform attention}\label{sec:uniform}
+
+Let $A_l=\frac1n\mathbf 1\mathbf 1^{T}$ for all $l$, and assume $S_0>0$ and $\bar x_0\ne0$. Then $M_l=0$, so $Y_l=Y_0$ for all $l$, and $X_l=\mathbf 1\bar x_l^{T}+Y_0$ with mean token $\bar x_l$ satisfying $\bar x_{l+1}^{T}=\bar x_l^{T}(I+\alpha_lW_l)$. Since $W_l$ is independent of $\cG_l$ and the law of $uW_l$ is $N(0,I_d/d)$ for every fixed unit vector $u$,
+\[
+|\bar x_L|^2=|\bar x_0|^2\prod_{l<L}\zeta_l,
+\]
+where the $\zeta_l$ are independent and $\zeta_l$ has the law of $|e_1+\alpha_lg/\sqrt d|^2$, $g\sim N(0,I_d)$. Here $T_L=S_0+n|\bar x_L|^2$ and $r_L=S_0/(S_0+n|\bar x_L|^2)$.
+
+Expanding $\log(1+2ag_1+a^2|g|^2)$ with $a=\alpha/\sqrt d$ gives $\EE\log\zeta=\alpha^2(1-2/d)+O(\alpha^4)$ and $\operatorname{Var}\log\zeta=4\alpha^2/d+O(\alpha^4)$. By Lemma~\ref{lem:heat} with $\Sigma=a^2I_d$, $\EE\log\zeta\ge0$ for $d\ge2$, with strict inequality for $d\ge3$ because the Laplacian of $\log|x|^2$ is then positive. For $d=2$ the term of order $\alpha^2$ vanishes, so we take $d\ge3$ below. The remainders are uniform in $\alpha\le1$. On the event $\{|g|\le\sqrt d/(4\alpha)\}$, which is symmetric under $g\mapsto-g$, we have $|2ag_1+a^2|g|^2|\le\frac94a|g|\le\frac9{16}$, so Taylor's formula for $\log(1+x)$ to third order leaves a remainder at most $a^4$ times a polynomial in $|g|$, and the terms of odd degree in $g$ have mean zero over this event. The complement has probability at most $e^{-c_d/\alpha^2}$ for a constant $c_d>0$. Every moment of $\log\zeta$ is bounded uniformly in $\alpha\le1$, since every power of $\log|x|$ is locally integrable and the density of $e_1+ag$ on $\{|x|\le1/2\}$ is at most $(2\pi a^2)^{-d/2}e^{-1/(8a^2)}$, which is bounded in $a$.The same bounds give $\EE|\log\zeta-\EE\log\zeta|^3=O(\alpha^3)$. Consequently:
+\begin{enumerate}[label=(\roman*)]
+\item if $\alpha_l=\alpha>0$ and $d\ge3$, then $\frac1L\log r_L\to-\EE\log\zeta<0$ almost surely by the strong law of large numbers~\cite[Section~22]{Bil}, so $r_L\to0$ exponentially at rate $\alpha^2(1-2/d)+O(\alpha^4)$;
+\item if $\alpha_l=c/\sqrt L$ with $d$ fixed, then $\log(|\bar x_L|^2/|\bar x_0|^2)$ converges in law to $N(c^2(1-2/d),4c^2/d)$ by the Lindeberg central limit theorem for triangular arrays~\cite[Theorem~27.2]{Bil}, applied to the centred variables $\log\zeta_l-\EE\log\zeta_l$, whose Lindeberg condition follows from the third-moment bound since $L(c/\sqrt L)^3\to0$, and $r_L$ converges in law to a random variable in $(0,1)$.
+\end{enumerate}
+Item (i) shows that the order $\alpha^2$ in Corollary~\ref{cor:fixed} is attained; the constant there is larger by a factor of order $n$. Item (ii) is the uniform attention case of Corollary~\ref{cor:scaling}, with an explicit limit.
+
+\section{Numerical illustration}\label{sec:numerics}
+
+We ran the network of Assumption~\ref{ass:main} with $n=8$, $d=16$, $\alpha_l=1/\sqrt L$ and $X_0$ with independent $N(3,1)$ entries, for $L=100$, $1000$ and $4000$, with $200$, $200$ and $60$ independent runs. The attention was uniform; softmax of $\beta X_lQ_lK_l^{T}X_l^{T}/(\sqrt d\,\rho_l^2)$ with $Q_l,K_l$ independent with $N(0,1/d)$ entries, $\rho_l^2=T_l/(nd)$ and $\beta\in\{1,4,16,64\}$; and the fixed matrix sending the first four tokens to token one and the last four to token two (two clusters), for which $\|M_l\|_\op^2=n/2$. Table~\ref{tab:sim} reports $\log(S_L/S_0)$.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{lcccccc}
+\toprule
+& \multicolumn{2}{c}{$L=100$} & \multicolumn{2}{c}{$L=1000$} & \multicolumn{2}{c}{$L=4000$}\\
+attention & mean & min & mean & min & mean & min\\
+\midrule
+uniform & $0.000$ & $0.000$ & $0.000$ & $0.000$ & $0.000$ & $0.000$\\
+softmax, $\beta=1$ & $0.000$ & $-0.021$ & $0.001$ & $-0.018$ & $0.001$ & $-0.018$\\
+softmax, $\beta=4$ & $0.014$ & $-0.061$ & $0.014$ & $-0.052$ & $0.015$ & $-0.044$\\
+softmax, $\beta=16$ & $0.084$ & $-0.125$ & $0.097$ & $-0.078$ & $0.104$ & $-0.070$\\
+softmax, $\beta=64$ & $0.211$ & $-0.052$ & $0.194$ & $-0.054$ & $0.195$ & $-0.022$\\
+two clusters & $0.442$ & $0.063$ & $0.462$ & $0.005$ & $0.457$ & $0.036$\\
+\bottomrule
+\end{tabular}
+\caption{Mean and minimum over runs of $\log(S_L/S_0)$ for $n=8$, $d=16$, $\alpha_l=1/\sqrt L$.}\label{tab:sim}
+\end{table}
+
+The means are nonnegative and of the same order at the three depths, as Theorems~\ref{thm:sub} and~\ref{thm:tail}, whose bounds are uniform in $L$, allow. For $d=1$, $A_l=I$ and $\alpha_l=1$ the drift is $h(1)=-0.41699$, so the negative drift of Proposition~\ref{prop:d1} persists at $\alpha=1$, outside the range $\alpha\le1/4$ proved there.
+
+\section{Remarks}\label{sec:remarks}
+
+\begin{remark}[Several heads]\label{rem:heads}
+With $H$ heads, $X_{l+1}=X_l+\alpha_l\sum_\nu A_l^{(\nu)}X_lW_l^{(\nu)}$ with independent value matrices, the increment of $Y_l$ has covariance $I_d\otimes\sum_\nu C^{(\nu)}$, where $C^{(\nu)}=\frac{\alpha_l^2}{d}M_l^{(\nu)}Y_lY_l^{T}M_l^{(\nu)T}$ and $M_l^{(\nu)}=PA_l^{(\nu)}$, and the inequality of Theorem~\ref{thm:sub} holds. With an output projection, $X_{l+1}=X_l+\alpha_lA_lX_lW_lO_l$ with $O_l$ independent of $W_l$ and $\cG_l$-measurable, the covariance is $(O_l^{T}O_l/d)\otimes(\alpha_l^2M_lY_lY_l^{T}M_l^{T})$, and the hypothesis of Lemma~\ref{lem:heat} holds whenever $\Tr(O_l^{T}O_l)\ge2\|O_l\|_\op^2$.
+\end{remark}
+
+\begin{remark}[Layer normalization, feed-forward layers, parallel tokens]\label{rem:limits}
+Let $\mathrm{LN}$ denote layer normalization, which centres and rescales each token separately. In the post-norm arrangement $X_{l+1}=\mathrm{LN}(X_l+\alpha_lA_lX_lW_l)$, or after a feed-forward layer whose last weight matrix is not Gaussian or not independent of $\cG_l$, the increment of $PX_l$ is no longer Gaussian given $\cG_l$. In the pre-norm arrangement $X_{l+1}=X_l+\alpha_lA_l\mathrm{LN}(X_l)W_l$ the increment $\alpha_lPA_l\mathrm{LN}(X_l)W_l$ is centred Gaussian given $\cG_l$ with covariance of the form $I_d\otimes C$, and the inequality of Theorem~\ref{thm:sub} holds; Proposition~\ref{prop:second} does not, since $\|PA_l\mathrm{LN}(X_l)\|_F$ is not bounded by a multiple of $\|PX_l\|_F$. The ratio $r_l$ does not detect parallel tokens: if the tokens are $b_iv$ with $|v|=1$ and $b_1,\dots,b_n$ not all equal, then $r_l=\sum_i(b_i-\bar b)^2/\sum_ib_i^2>0$, where $\bar b=\frac1n\sum_ib_i$.
+\end{remark}
+
+\begin{remark}[An open question]\label{rem:open}
+Under uniform attention $\log(|\bar x_L|^2/|\bar x_0|^2)$ has a Gaussian limit in law when $\alpha_l=c/\sqrt L$ (Section~\ref{sec:uniform}). Does $\log S_L$ have a limit in law when $\alpha_l=c/\sqrt L$ and $A_l$ is a softmax with logits of order one, so that $M_l$ is of order one and depends on $X_l$?
+\end{remark}
+
+\section*{Acknowledgements and funding}
+The research presented here was supported by the European Research Council (ERC) under the European Union's Horizon Europe research and innovation program (grant agreement No.~101041711) and by the Simons Foundation as part of the Collaboration on the Mathematical and Scientific Foundations of Deep Learning. It was also supported by Heights Labs, by Convex Nexus Capital, and by the Israel Science Foundation (grants 2258/19 and 4101/25).
+
+\section*{Declaration of competing interest}
+The author holds equity in Heights Labs and in Convex Nexus Capital and has a management role at Convex Nexus Capital.
+
+\section*{Declaration of generative AI and AI-assisted technologies}
+Claude Opus~5.5 (Anthropic) found and proved the results, ran the computations and wrote the paper. It worked connected to Math Brain~\cite{MathBrainRepo} within the Brain framework~\cite{BrainFramework}; see~\cite{MathBrainPaper}.
+
+The results rest on the work of others. The question of rank collapse in residual self-attention and the decomposition behind Lemma~\ref{lem:reduce} come from Dong, Cordonnier and Loukas~\cite{DCL}, and the uniform-attention computation and the depth-dependent scaling of the residual branches from Noci et al.~\cite{NABOSL}. Lemma~\ref{lem:heat} extends the classical subharmonicity of $\log|x|$ in dimension at least two. The paper adds the submartingale property for every attention allowed by Assumption~\ref{ass:main} (Theorem~\ref{thm:sub}), the lower tail of $\log S_L$ (Theorem~\ref{thm:tail}) and its corollaries for the ratio $r_L$. Whether $\log S_L$ has a limit in law under softmax attention with $\alpha_l=c/\sqrt L$ remains open.
+
+The author directed the work and is responsible for the content of the paper and for decisions concerning its dissemination.
+
+\section*{Data availability}
+The \LaTeX{} source of the paper and four Python scripts are archived at \url{https://doi.org/10.5281/zenodo.24326594} and at \url{https://github.com/yspennstate/residual-attention-centred-energy/tree/v1.0}. The scripts compute the constant $C_*$ and the function $h$ by quadrature, run the networks of Table~\ref{tab:sim}, and check by Monte Carlo the sign of the one-step drift $\EE[\log(S_{l+1}/S_l)\mid\cG_l]$ for $d=1,2,3,16$ and several attention matrices.
+
+\appendix
+\input{notation}
+
+\begin{thebibliography}{99}
+\bibitem{AS} J.~Alman and Z.~Song, \emph{Only large weights (and not skip connections) can prevent the perils of rank collapse}, preprint (2025), arXiv:2505.16284.
+\bibitem{Bil} P.~Billingsley, \emph{Probability and Measure}, 3rd edition, Wiley, New York, 1995.
+\bibitem{Cir}G.~Cirrincione, \emph{Rank, head-channel non-identifiability, and symmetry breaking: a precise analysis of representational collapse in transformers}, preprint (2026), arXiv:2604.23681.
+\bibitem{CN} J.~E.~Cohen and C.~M.~Newman, \emph{The stability of large random matrices and their products}, Annals of Probability 12 (1984), 283--310, doi:10.1214/aop/1176993291.
+\bibitem{CNQG} A.~Cowsik, T.~Nebabu, X.-L.~Qi and S.~Ganguli, \emph{Geometric dynamics of signal propagation predict trainability of transformers}, preprint (2024), arXiv:2403.02579.
+\bibitem{DCL} Y.~Dong, J.-B.~Cordonnier and A.~Loukas, \emph{Attention is not all you need: pure attention loses rank doubly exponentially with depth}, Proceedings of the 38th International Conference on Machine Learning, PMLR 139 (2021), 2793--2803, arXiv:2103.03404.
+\bibitem{FK} H.~Furstenberg and H.~Kesten, \emph{Products of random matrices}, Annals of Mathematical Statistics 31 (1960), 457--469, doi:10.1214/aoms/1177705909.
+\bibitem{GG} A.~Giorlandino and S.~Goldt, \emph{Two failure modes of deep transformers and how to avoid them: a unified theory of signal propagation at initialisation}, preprint (2025), arXiv:2505.24333.
+\bibitem{HN} B.~Hanin and M.~Nica, \emph{Products of many large random matrices and gradients in deep neural networks}, Communications in Mathematical Physics 376 (2020), 287--322, arXiv:1812.05994.
+\bibitem{LNR} M.~B.~Li, M.~Nica and D.~M.~Roy, \emph{The future is log-Gaussian: ResNets and their infinite-depth-and-width limit at initialization}, Advances in Neural Information Processing Systems 34 (2021), arXiv:2106.04013.
+\bibitem{NNT} T.~Nait Saada, A.~Naderi and J.~Tanner, \emph{Mind the gap: a spectral analysis of rank collapse and signal propagation in attention layers}, preprint (2024), arXiv:2410.07799.
+\bibitem{NABOSL} L.~Noci, S.~Anagnostidis, L.~Biggio, A.~Orvieto, S.~P.~Singh and A.~Lucchi, \emph{Signal propagation in transformers: theoretical perspectives and the role of rank collapse}, Advances in Neural Information Processing Systems 35 (2022), arXiv:2206.03126.
+\bibitem{shaped} L.~Noci, C.~Li, M.~B.~Li, B.~He, T.~Hofmann, C.~Maddison and D.~M.~Roy, \emph{The shaped transformer: attention models in the infinite depth-and-width limit}, Advances in Neural Information Processing Systems 36 (2023), arXiv:2306.17759.
+\bibitem{WAWJJ} X.~Wu, A.~Ajorlou, Y.~Wang, S.~Jegelka and A.~Jadbabaie, \emph{On the role of attention masks and LayerNorm in transformers}, Advances in Neural Information Processing Systems 37 (2024), arXiv:2405.18781.
+\bibitem{MathBrainRepo} Y.~Shmalo, \emph{Math Brain: public snapshot, code and tests}, 2026, \url{https://github.com/yspennstate/math-brain-public/tree/8c9a6bd478c4ec4082347151b7ae16db50c917dd}.
+\bibitem{MathBrainPaper} Y.~Shmalo, \emph{Math Brain: shared, auditable memory for multi-agent mathematical research}, October 2026, doi:10.5281/zenodo.24150837, \url{https://github.com/yspennstate/math-brain-public/tree/8c9a6bd478c4ec4082347151b7ae16db50c917dd/papers/math-brain-2026-10-24}.
+\bibitem{BrainFramework} Y.~Shmalo, \emph{Brain Framework}, public software repository, 2026, \url{https://github.com/yspennstate/brain-framework-public/tree/5629e644cdd510173ae97e9aa92642dabd22dc57}.
+\end{thebibliography}
+
+\end{document}

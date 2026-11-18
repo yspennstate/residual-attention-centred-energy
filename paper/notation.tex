@@ -1,0 +1,53 @@
+\section{Notation}\label{app:notation}
+Symbols are listed by the section in which they first appear. Standard symbols ($\RR$, $\EE$, $\PP$, $\Tr$, $\operatorname{Var}$, $\vect$) are omitted.
+
+{\small
+\begin{center}
+\begin{tabular}{@{}p{0.17\textwidth}p{0.58\textwidth}l@{}}\toprule
+Symbol & Meaning & First appears \\ \midrule
+$n$, $d$ & number of tokens, token dimension & Section~\ref{sec:intro} \\
+$X_l$ & token matrix after $l$ layers, in $\RR^{n\times d}$; its rows are the tokens & Section~\ref{sec:intro} \\
+$\mathbf 1$ & the vector of ones in $\RR^n$ & Section~\ref{sec:intro} \\
+$A_l$ & attention matrix of layer $l$, row-stochastic & Section~\ref{sec:intro} \\
+$W_l$ & value matrix of layer $l$, independent $N(0,1/d)$ entries & Section~\ref{sec:intro} \\
+$\alpha_l$, $\alpha$ & residual scale of layer $l$; its common value when constant & Section~\ref{sec:intro} \\
+$L$ & depth & Section~\ref{sec:intro} \\
+$P$ & $I-\frac1n\mathbf 1\mathbf 1^{T}$, subtraction of the mean token & Section~\ref{sec:intro} \\
+$\bar x_l$ & mean token $\frac1nX_l^{T}\mathbf 1$ & Section~\ref{sec:intro} \\
+$S_l$, $T_l$, $r_l$ & centred energy $\|PX_l\|_F^2$, total energy $\|X_l\|_F^2$, their ratio & Section~\ref{sec:intro} \\
+$\cG_l$ & $\sigma$-field of the first $l$ layers & Section~\ref{sec:intro} \\
+$c$ & residual scale constant in $\alpha_l=c/\sqrt L$ & Section~\ref{sec:intro} \\
+$t$, $\theta$ & threshold and Markov constant in the probability bound on $r_L$ & Section~\ref{sec:intro} \\
+$V_L$ & the bound on $\EE N_L^2$, the second moment of the martingale part (proof of Theorem~\ref{thm:tail}) & Section~\ref{sec:intro} \\
+$\xi$ & a standard normal variable & Section~\ref{sec:intro} \\
+$C_*$ & the absolute constant $\sup_{s>0}s^{-2}\EE\log^2(1+s\xi)^2\approx9.39$ & Section~\ref{sec:intro} \\
+$R$ & randomness on which the attention may depend & Section~\ref{sec:intro} \\
+$e_1$, $g$ & first standard basis vector of $\RR^d$; a standard Gaussian vector & Section~\ref{sec:intro} \\
+$G$, $\Sigma$, $\mu$ & centred Gaussian vector, its covariance, a nonzero mean vector & Section~\ref{sec:intro} \\
+$\lambda_{\max}$ & largest eigenvalue & Section~\ref{sec:intro} \\
+$\|\cdot\|_F$, $|\cdot|$ & Frobenius norm, Euclidean norm & Section~\ref{sec:intro} \\
+$k$, $\sigma$ & dimension of $G$; a standard deviation, in $\Sigma=\sigma^2I_k$ & Section~\ref{sec:intro} \\
+$Y_l$ & the centred part $PX_l$ & Section~\ref{sec:intro} \\
+$C_l$, $C$ & the $n\times n$ factor of the covariance $I_d\otimes C_l$ of the increment of $Y_l$ & Section~\ref{sec:intro} \\
+$\|\cdot\|_\op$ & operator norm & Section~\ref{sec:setting} \\
+$\beta$, $Q_l$, $K_l$, $B_l$ & inverse temperature, query and key matrices, mask of softmax attention (possibly random, independent of the value matrices) & Section~\ref{sec:setting} \\
+$\tau$ & standard deviation scale of the value entries & Section~\ref{sec:setting} \\
+$M_l$ & the matrix $PA_l$ & Section~\ref{sec:setting} \\
+$\gamma_l$ & largest column sum of $A_l$ & Section~\ref{sec:setting} \\
+$\|A\|_{1\to1}$, $\|A\|_{\infty\to\infty}$ & largest absolute column sum, largest absolute row sum & Section~\ref{sec:setting} \\
+$w_j$ & columns of $W_l$ & Section~\ref{sec:sub} \\
+$h$ & the function $h(s)=\EE\log(1+s\xi)^2$ & Section~\ref{sec:sub} \\
+$\kappa$, $\varphi$, $\Phi$ & truncated second moment of $\xi$; standard normal density and distribution function & Section~\ref{sec:sub} \\
+$\Delta_l$ & $\log(S_{l+1}/S_l)$ & Section~\ref{sec:bounds} \\
+$\eta$, $q$, $\sigma_\eta$ & $2\eta$ and $q$ are the linear and quadratic parts of $S_{l+1}/S_l-1$; $\sigma_\eta$ is the standard deviation of $\eta$ & Section~\ref{sec:bounds} \\
+$D_l$, $N_L$ & conditional drift $\EE[\Delta_l\mid\cG_l]$ and the martingale $\sum_{l<L}(\Delta_l-D_l)$ & Section~\ref{sec:bounds} \\
+$\zeta_l$ & the independent factors of $|\bar x_L|^2/|\bar x_0|^2$ & Section~\ref{sec:uniform} \\
+$\rho_l$ & token scale $\sqrt{T_l/(nd)}$ in the simulated softmax & Section~\ref{sec:numerics} \\
+$C^{(\nu)}$, $M_l^{(\nu)}$ & the matrix $\frac{\alpha_l^2}{d}M_l^{(\nu)}Y_lY_l^{T}M_l^{(\nu)T}$ of head $\nu$, and $M_l^{(\nu)}=PA_l^{(\nu)}$ & Remark~\ref{rem:heads} \\
+$H$, $O_l$ & number of heads; output projection & Section~\ref{sec:remarks} \\
+$\mathrm{LN}$ & layer normalization & Remark~\ref{rem:limits} \\
+\bottomrule
+\end{tabular}
+\end{center}
+}
+Letters local to one proof: $f_\varepsilon$, $\psi$, $\omega$ (Lemma~\ref{lem:heat}); $w$ (Proposition~\ref{prop:d1}); $F$, $\Gamma$, $z$ (Proposition~\ref{prop:second}); $x_j$, $a_{ij}$ (Proposition~\ref{prop:energy}); $u$, $a$ (Section~\ref{sec:uniform}); $b_i$, $\bar b$, $v$ (Remark~\ref{rem:limits}).
